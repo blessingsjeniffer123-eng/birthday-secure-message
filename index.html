@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Secure Message</title>
+
+    <style>
+        body {
+            background-color: black;
+            color: lime;
+            font-family: monospace;
+            text-align: center;
+            padding-top: 100px;
+        }
+
+        input, button {
+            padding: 10px;
+            margin: 10px;
+            background: black;
+            color: lime;
+            border: 1px solid lime;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #message {
+            width: 80%;
+            margin: auto;
+            text-align: left;
+            white-space: pre-line;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div id="login">
+    <h1>🔒 Secure Access</h1>
+    <p>Enter Password</p>
+    <input type="password" id="password">
+    <br>
+    <button onclick="unlock()">UNLOCK</button>
+</div>
+
+<!-- MESSAGE -->
+<div id="content" class="hidden">
+    <h1>ACCESS GRANTED</h1>
+    <p id="message"></p>
+</div>
+
+<!-- MUSIC -->
+<audio id="music" src="song.mp3"></audio>
+
+<script>
+const PASSWORD = "birthday";
+
+const TEXT = `🎉 HAPPY BIRTHDAY 🎉
+
+I’ve been meaning to say this for a long time… You’ve been like a father to me in every way that matters—even from far away.
+
+You’ve taught me lessons I’ll carry forever. Your guidance, words, and just knowing you're there have meant more to me than I can explain. Even though you've been far, you still manage to support my mother, brother, and me, and I will be forever grateful.
+
+Thank you for your patience, your advice, your jokes, your care, and just for being the kind of person who shows up no matter what. You’ve shaped so much of who I am today, and I’m incredibly grateful.
+
+I hope today reminds you of how important and special you are, not just by me, but by everyone lucky enough to know you. You deserve every bit of happiness, love, and joy today and always.
+
+
+You’ve made a bigger impact on my life than I can ever fully explain.
+
+I appreciate you more than I say.
+
+— From someone who really cares about you, Princess Blessings ❤️
+
+let index = 0;
+
+function unlock() {
+    let input = document.getElementById("password").value.trim();
+
+    if (input.toLowerCase() === PASSWORD) {
+
+        document.getElementById("login").style.display = "none";
+        document.getElementById("content").classList.remove("hidden");
+
+        // Play music
+        let music = document.getElementById("music");
+        music.play().catch(() => {});
+
+        typeText();
+
+    } else {
+        alert("Wrong password");
+    }
+}
+
+function typeText() {
+    let msg = document.getElementById("message");
+
+    let interval = setInterval(() => {
+        if (index < TEXT.length) {
+            msg.innerHTML += TEXT.charAt(index);
+            index++;
+        } else {
+            clearInterval(interval);
+        }
+    }, 30);
+}
+</script>
+
+</body>
+</html>
