@@ -1,15 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Secure Message</title>
-
+    <title>Secure Birthday Message</title>
     <style>
         body {
-            background-color: black;
+            background: black;
             color: lime;
             font-family: monospace;
             text-align: center;
-            padding-top: 100px;
+            padding-top: 80px;
+            overflow: hidden;
+            position: relative;
         }
 
         input, button {
@@ -18,10 +19,8 @@
             background: black;
             color: lime;
             border: 1px solid lime;
-        }
-
-        .hidden {
-            display: none;
+            cursor: pointer;
+            font-weight: bold;
         }
 
         #message {
@@ -30,35 +29,86 @@
             text-align: left;
             white-space: pre-line;
         }
+
+        .glitch {
+            animation: glitch 1s infinite;
+        }
+
+        @keyframes glitch {
+            0% { text-shadow: 2px 0 red, -2px 0 blue; }
+            20% { text-shadow: -2px 0 red, 2px 0 blue; }
+            40% { text-shadow: 2px 2px red, -2px -2px blue; }
+            60% { text-shadow: -2px -2px red, 2px 2px blue; }
+            80% { text-shadow: 2px 0 red, -2px 0 blue; }
+            100% { text-shadow: none; }
+        }
+
+        #countdown h2 {
+            font-size: 48px;
+            color: yellow;
+            animation: pulse 1s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity:0.8;}
+            50% { transform: scale(1.2); opacity:1;}
+            100% { transform: scale(1); opacity:0.8;}
+        }
+
+        #system-complete {
+            color: yellow;
+            font-weight: bold;
+            font-size: 28px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .particle {
+            position: absolute;
+            top: -50px;
+            pointer-events: none;
+            font-size: 24px;
+            animation-name: fall;
+            animation-timing-function: linear;
+            animation-iteration-count: 1;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(0) rotate(0deg); opacity:1; }
+            100% { transform: translateY(100vh) rotate(360deg); opacity:0; }
+        }
     </style>
 </head>
-
 <body>
 
-<!-- LOGIN -->
 <div id="login">
-    <h1>🔒 Secure Access</h1>
+    <h1 class="glitch">🔒 Secure Access</h1>
     <p>Enter Password</p>
-    <input type="password" id="password">
+    <input type="text" id="pwd">
     <br>
     <button onclick="unlock()">UNLOCK</button>
 </div>
 
-<!-- MESSAGE -->
-<div id="content" class="hidden">
-    <h1>ACCESS GRANTED</h1>
-    <p id="message"></p>
+<div id="countdown" style="display:none;">
+    <h2 id="timer">5</h2>
 </div>
 
-<!-- MUSIC -->
-<audio id="music" src="song.mp3"></audio>
+<div id="content" style="display:none;">
+    <h1 class="glitch">ACCESS GRANTED</h1>
+    <p id="message"></p>
+    <div id="system-complete">SYSTEM COMPLETE ✔</div>
+</div>
+
+<audio id="music" src="song.mp3" volume="0"></audio>
 
 <script>
 const PASSWORD = "birthday";
 
 const TEXT = `🎉 HAPPY BIRTHDAY 🎉
 
-I’ve been meaning to say this for a long time… You’ve been like a father to me in every way that matters—even from far away.
+I’ve been meaning to say this for a long time…
+
+You’ve been like a father to me in every way that matters—even from far away.
 
 You’ve taught me lessons I’ll carry forever. Your guidance, words, and just knowing you're there have meant more to me than I can explain. Even though you've been far, you still manage to support my mother, brother, and me, and I will be forever grateful.
 
@@ -66,45 +116,90 @@ Thank you for your patience, your advice, your jokes, your care, and just for be
 
 I hope today reminds you of how important and special you are, not just by me, but by everyone lucky enough to know you. You deserve every bit of happiness, love, and joy today and always.
 
-
 You’ve made a bigger impact on my life than I can ever fully explain.
 
 I appreciate you more than I say.
 
-— From someone who really cares about you, Princess Blessings ❤️
+— From someone who really cares about you, Princess Blessings ❤️`;
 
-let index = 0;
+let i = 0;
 
 function unlock() {
-    let input = document.getElementById("password").value.trim();
-
-    if (input.toLowerCase() === PASSWORD) {
-
+    let input = document.getElementById("pwd").value.trim().toLowerCase();
+    if (input === PASSWORD) {
         document.getElementById("login").style.display = "none";
-        document.getElementById("content").classList.remove("hidden");
+        document.getElementById("countdown").style.display = "block";
 
-        // Play music
-        let music = document.getElementById("music");
+        const music = document.getElementById("music");
+        music.volume = 0;
         music.play().catch(() => {});
+        fadeMusic(music, 1, 4000); // fade in over 4 seconds
 
-        typeText();
-
+        startCountdown(5);
+        startParticles();
     } else {
         alert("Wrong password");
     }
 }
 
-function typeText() {
-    let msg = document.getElementById("message");
+function fadeMusic(audio, targetVolume, duration) {
+    const step = 50;
+    const increment = targetVolume / (duration/step);
+    let vol = 0;
+    const interval = setInterval(() => {
+        vol += increment;
+        if (vol >= targetVolume) {
+            audio.volume = targetVolume;
+            clearInterval(interval);
+        } else {
+            audio.volume = vol;
+        }
+    }, step);
+}
 
+function startCountdown(seconds) {
+    const timerEl = document.getElementById("timer");
+    timerEl.textContent = seconds;
     let interval = setInterval(() => {
-        if (index < TEXT.length) {
-            msg.innerHTML += TEXT.charAt(index);
-            index++;
+        seconds--;
+        if (seconds >= 0) timerEl.textContent = seconds;
+        if (seconds < 0) {
+            clearInterval(interval);
+            document.getElementById("countdown").style.display = "none";
+            document.getElementById("content").style.display = "block";
+            typeText();
+        }
+    }, 1000);
+}
+
+function typeText() {
+    const msg = document.getElementById("message");
+    const interval = setInterval(() => {
+        if (i < TEXT.length) {
+            msg.innerHTML += TEXT.charAt(i);
+            i++;
         } else {
             clearInterval(interval);
+            document.getElementById("system-complete").style.display = "block";
         }
     }, 30);
+}
+
+function startParticles() {
+    const symbols = ["❤️", "💐", "🌸", "💛", "💖"];
+    setInterval(() => {
+        const particle = document.createElement("div");
+        particle.classList.add("particle");
+        particle.textContent = symbols[Math.floor(Math.random()*symbols.length)];
+        particle.style.left = Math.random() * window.innerWidth + "px";
+        particle.style.fontSize = 20 + Math.random()*30 + "px";
+        particle.style.animationDuration = 3 + Math.random()*2 + "s";
+        particle.style.transform = `rotate(${Math.random()*360}deg)`;
+        document.body.appendChild(particle);
+        setTimeout(() => {
+            document.body.removeChild(particle);
+        }, 5000);
+    }, 300);
 }
 </script>
 
